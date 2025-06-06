@@ -29,7 +29,7 @@ def build_observation_form_page():
     """Builds the layout for the observation submission form."""
     return html.Div(className="container", children=[
         html.Div(className="header", children=[
-            html.Img(src='/assets/25h Logos.png', alt="RiskWatch Logo", className="app-logo"),
+            html.Img(src='/assets/riskwatch-logo.png', alt="RiskWatch Logo", className="app-logo"),
             html.P("Safety Observation Assistant", className="app-subtitle", style={'fontSize': '24px', 'fontWeight': '500'}),
             dcc.Link('Back to Home', href='/', className='nav-link')
         ]),
@@ -72,7 +72,7 @@ def build_report_page():
     return html.Div(className="report-container", children=[
         dcc.Download(id='download-excel'),
         html.Div(className="header", children=[
-            html.Img(src='/assets/25h Logos.png', alt="RiskWatch Logo", className="app-logo"),
+            html.Img(src='/assets/riskwatch-logo.png', alt="RiskWatch Logo", className="app-logo"),
             html.H1("Full Safety Observation Report"),
             dcc.Link('Back to Home', href='/', className='nav-link')
         ]),
@@ -113,7 +113,7 @@ def generate_excel_for_download(observations_data):
     logo_path = os.path.join('assets', '25h Logos.png')
     if os.path.exists(logo_path):
         logo = OpenpyxlImage(logo_path)
-        logo.height = 45; logo.width = 120
+        logo.height = 80; logo.width = 90
         sheet.add_image(logo, 'A1')
 
     title_font = Font(name='Calibri', size=16, bold=True, color="000080")

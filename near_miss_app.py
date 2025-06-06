@@ -7,7 +7,7 @@ def build_near_miss_page():
     return html.Div(className="report-container", children=[
        html.Div(className="header", children=[
            # Note: We use root-relative paths for assets in modular apps
-           html.Img(src='/assets/25h Logos.png', alt="RiskWatch Logo", className="app-logo"),
+           html.Img(src='/assets/riskwatch-logo.png', alt="RiskWatch Logo", className="app-logo"),
            html.H1("Near Miss Reporting"),
            dcc.Link('Back to Home', href='/', className='nav-link')
        ]),

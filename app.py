@@ -34,7 +34,7 @@ near_miss_app.register_callbacks(app)
 def build_home_page():
     """Builds the layout for the home/navigation page."""
     return html.Div(className="home-container", children=[
-        html.Img(src=app.get_asset_url('25h Logos.png'), alt="RiskWatch Logo", className="app-logo"),
+        html.Img(src=app.get_asset_url('riskwatch-logo.png'), alt="RiskWatch Logo", className="app-logo"),
         html.Div(className="home-button-container", children=[
             dcc.Link("Safety Observation", href="/observation", className="button-style"),
             dcc.Link("Near Miss Report", href="/near-miss", className="button-style")
