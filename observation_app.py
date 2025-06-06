@@ -1,3 +1,5 @@
+# observation_app.py
+
 import os
 import datetime
 import base64
@@ -11,6 +13,10 @@ from dash.exceptions import PreventUpdate
 import database
 from ai_module import get_ai_analysis
 
+# --- ADDED IMPORTS FOR PSYCOPG2 ---
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 # Imports for Excel Generation
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image as OpenpyxlImage
@@ -23,7 +29,6 @@ def build_observation_form_page():
     """Builds the layout for the observation submission form."""
     return html.Div(className="container", children=[
         html.Div(className="header", children=[
-            # Note: We use root-relative paths for assets in modular apps
             html.Img(src='/assets/25h Logos.png', alt="RiskWatch Logo", className="app-logo"),
             html.P("Safety Observation Assistant", className="app-subtitle", style={'fontSize': '24px', 'fontWeight': '500'}),
             dcc.Link('Back to Home', href='/', className='nav-link')
@@ -90,8 +95,6 @@ def build_report_page():
 
 # --- Helper Function for Excel Generation ---
 def generate_excel_for_download(observations_data):
-    # This function is unchanged and moved here for co-location with its usage.
-    # ... (exact same code as in the original app.py)
     EXCEL_PHOTO_TARGET_WIDTH_PX = 150
     EXCEL_PHOTO_TARGET_HEIGHT_PX = 112
     EXCEL_ROW_HEIGHT_FOR_PHOTO_PT = 90.0
@@ -145,12 +148,20 @@ def generate_excel_for_download(observations_data):
         elif 5 <= risk_rating <= 9: risk_cell.fill = yellow_fill
         elif 10 <= risk_rating <= 15: risk_cell.fill = orange_fill
         elif risk_rating >= 16: risk_cell.fill = red_fill
-        if entry.get('photo_bytes'):
+        
+        # In Postgres, bytea comes back as memoryview or bytes, which is fine
+        photo_bytes_data = entry.get('photo_bytes')
+        if photo_bytes_data:
             try:
-                img = OpenpyxlImage(io.BytesIO(entry['photo_bytes'])); img.width, img.height = EXCEL_PHOTO_TARGET_WIDTH_PX, EXCEL_PHOTO_TARGET_HEIGHT_PX
+                img = OpenpyxlImage(io.BytesIO(photo_bytes_data))
+                img.width, img.height = EXCEL_PHOTO_TARGET_WIDTH_PX, EXCEL_PHOTO_TARGET_HEIGHT_PX
                 sheet.add_image(img, get_column_letter(headers.index('Photo Evidence') + 1) + str(new_row_num))
-            except Exception as e: print(f"Error embedding photo: {e}"); sheet.cell(row=new_row_num, column=(headers.index('Photo Evidence') + 1)).value = "Error"
-        else: sheet.cell(row=new_row_num, column=(headers.index('Photo Evidence') + 1)).value = "No Photo"
+            except Exception as e:
+                print(f"Error embedding photo: {e}")
+                sheet.cell(row=new_row_num, column=(headers.index('Photo Evidence') + 1)).value = "Error"
+        else:
+            sheet.cell(row=new_row_num, column=(headers.index('Photo Evidence') + 1)).value = "No Photo"
+            
     excel_stream = io.BytesIO(); workbook.save(excel_stream); excel_stream.seek(0)
     return excel_stream
 
@@ -217,16 +228,31 @@ def register_callbacks(app):
             cards.append(card)
         return cards
 
-    @app.callback(Output('download-excel', 'data'), Input('download-report-button', 'n_clicks'), prevent_initial_call=True)
+    @app.callback(
+        Output('download-excel', 'data'),
+        Input('download-report-button', 'n_clicks'),
+        prevent_initial_call=True
+    )
     def download_full_report(n_clicks):
         conn = database.get_db_connection()
-        obs_for_excel = [dict(row) for row in conn.execute("SELECT * FROM observations ORDER BY id ASC").fetchall()]
+        # Use a cursor to execute the query, with RealDictCursor to get dicts
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Fetch all columns, including the photo_bytes for the Excel file
+            cur.execute("SELECT * FROM observations ORDER BY id ASC")
+            obs_for_excel = cur.fetchall()
         conn.close()
-        if not obs_for_excel: raise PreventUpdate
+
+        if not obs_for_excel:
+            raise PreventUpdate
+
         excel_stream = generate_excel_for_download(obs_for_excel)
         filename = f"Full_Safety_Report_{datetime.datetime.now().strftime('%Y%m%d')}.xlsx"
         return dcc.send_bytes(excel_stream.read(), filename)
 
-    @app.callback(Output('selected-file-name', 'children'), Input('photo-upload', 'filename'), prevent_initial_call=True)
+    @app.callback(
+        Output('selected-file-name', 'children'),
+        Input('photo-upload', 'filename'),
+        prevent_initial_call=True
+    )
     def update_filename_display(filename):
         return f"File selected: {filename}" if filename else ""
