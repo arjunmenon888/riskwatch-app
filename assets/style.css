@@ -1,0 +1,156 @@
+/* assets/style.css (Final Version) */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+/* --- Container for the Observation Form Page --- */
+.container {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 520px;
+    box-sizing: border-box;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.app-logo {
+    max-width: 220px;
+    height: auto;
+    display: block;
+    margin: 0 auto 15px auto;
+}
+
+.app-subtitle, .report-container h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #495057;
+}
+
+/* --- Styles for the New Home Page --- */
+.home-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 5vh;
+}
+
+.home-button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 40px;
+}
+
+/* --- Report Page Specific Styles --- */
+.report-container {
+    width: 100%;
+    max-width: 960px;
+    margin: 20px auto;
+    padding: 30px 40px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.report-container .header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 15px;
+}
+
+.report-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    gap: 20px;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 30px;
+}
+
+.report-controls .search-bar {
+    width: 100%;
+    flex: 1 1 40%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-size: 1em;
+}
+
+.sort-dropdown-wrapper {
+    flex: 1 1 30%;
+}
+
+.report-controls .download-button {
+    flex: 1 1 30%;
+    background-color: #28a745;
+    padding: 12px 20px;
+}
+.report-controls .download-button:hover {
+    background-color: #218838;
+}
+
+/* --- Styles for Observation Cards --- */
+.obs-card { display: flex; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 20px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); gap: 25px; }
+.card-main { flex: 3; }
+.card-main h3 { margin-top: 0; margin-bottom: 15px; color: #003366; font-size: 1.4em; font-weight: 600; }
+.card-main p { margin: 8px 0; line-height: 1.6; color: #495057; }
+.card-sidebar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+.card-photo { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; border: 1px solid #ced4da; }
+.risk-box { width: 100%; text-align: center; }
+.risk-title { font-weight: 500; font-size: 0.9em; color: #6c757d; margin-bottom: 5px; }
+.risk-value { font-size: 2.8em; font-weight: 700; padding: 15px 10px; border-radius: 8px; color: #fff; line-height: 1; }
+.risk-low { background-color: #28a745; }
+.risk-medium { background-color: #ffc107; }
+.risk-high { background-color: #fd7e14; }
+.risk-critical { background-color: #dc3545; }
+
+/* --- Generic & Reusable Styles --- */
+.nav-link { display: inline-block; margin-top: 10px; margin-bottom: 20px; padding: 10px 25px; background-color: #343a40; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background-color 0.2s; }
+.nav-link:hover { background-color: #212529; }
+.form-group, .button-group { margin-bottom: 20px; }
+.button-group { margin-top: 30px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+.form-group input[type="text"], .form-group textarea { width: 100%; padding: 12px 15px; border: 1.5px solid #ced4da; border-radius: 8px; box-sizing: border-box; font-size: 16px; font-family: 'Inter', sans-serif; }
+.form-group textarea { min-height: 100px; resize: vertical; }
+.photo-upload-area { border: 2px dashed #ced4da; border-radius: 10px; padding: 25px 20px; text-align: center; background-color: #f8f9fa; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.photo-upload-img-icon { width: 36px; height: 36px; margin-bottom: 5px; }
+.upload-photo-button-label { display: inline-flex; flex-direction: column; align-items: center; background-color: #ffffff; color: #343a40; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 15px; transition: background-color 0.2s ease; border: 1px solid #ced4da; text-decoration: none; }
+#selected-file-name { display: block; text-align: center; margin-top: 12px; font-size: 0.9em; color: #6c757d; min-height: 1.2em; }
+.button-style { background-color: #003366; color: white; padding: 14px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.2s ease; text-decoration: none; white-space: nowrap; }
+.button-style:hover { background-color: #002244; }
+.flash-messages li { list-style: none; padding: 12px 18px; margin-bottom: 15px; border-radius: 8px; font-size: 15px; border: 1px solid transparent; }
+.flash-messages .success { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
+.flash-messages .warning { background-color: #fff3cd; color: #664d03; border-color: #ffecb5; }
+.app-footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; font-size: 0.85em; color: #6c757d; }
