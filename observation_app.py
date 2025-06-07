@@ -104,10 +104,10 @@ def generate_excel_for_download(observations_data):
     sheet = workbook.active
     sheet.title = "Safety Observation Report"
 
-    green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
-    yellow_fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
-    orange_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-    red_fill = PatternFill(start_color="9C0006", end_color="9C0006", fill_type="solid")
+    green_fill = PatternFill(start_color="04A227", end_color="04A227", fill_type="solid")
+    yellow_fill = PatternFill(start_color="FFD406", end_color="FFD406", fill_type="solid")
+    orange_fill = PatternFill(start_color="FF7A00", end_color="FF7A00", fill_type="solid")
+    red_fill = PatternFill(start_color="F14219", end_color="F14219", fill_type="solid")
 
     sheet.merge_cells('A1:C4')
     logo_path = os.path.join('assets', '25h Logos.png')

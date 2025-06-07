@@ -132,10 +132,10 @@ body {
 .risk-box { width: 100%; text-align: center; }
 .risk-title { font-weight: 500; font-size: 0.9em; color: #6c757d; margin-bottom: 5px; }
 .risk-value { font-size: 2.8em; font-weight: 700; padding: 15px 10px; border-radius: 8px; color: #fff; line-height: 1; }
-.risk-low { background-color: #28a745; }
-.risk-medium { background-color: #ffc107; }
-.risk-high { background-color: #fd7e14; }
-.risk-critical { background-color: #dc3545; }
+.risk-low { background-color: #04A227; }
+.risk-medium { background-color: #FFD406; }
+.risk-high { background-color: #FF7A00; }
+.risk-critical { background-color: #F14219; }
 
 /* --- Generic & Reusable Styles --- */
 .nav-link { display: inline-block; margin-top: 10px; margin-bottom: 20px; padding: 10px 25px; background-color: #343a40; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background-color 0.2s; }
