@@ -122,3 +122,13 @@ def get_observations_from_db(search_term=None, sort_by='date_newest'):
             obs['photo_b64'] = None
             
     return observations
+
+def delete_observation_from_db(observation_id):
+    """Deletes an observation record from the database by its ID."""
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        sql = "DELETE FROM observations WHERE id = %s;"
+        cur.execute(sql, (observation_id,))
+    conn.commit()
+    conn.close()
+    print(f"Observation with ID {observation_id} deleted from database.")

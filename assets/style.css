@@ -95,24 +95,68 @@ body {
 #selected-file-name { display: block; text-align: center; margin-top: 15px; font-size: 1em; color: #6c757d; min-height: 1.2em; }
 
 /* --- REPORT PAGE Specific Styles --- */
+#delete-status-message {
+    padding-bottom: 15px;
+}
+.message-success, .message-error {
+    padding: 12px 18px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    font-size: 15px;
+    border: 1px solid transparent;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.message-success { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
+.message-error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
 .report-main-content .form-title { margin-bottom: 30px; }
 .report-controls { display: flex; justify-content: space-between; align-items: center; padding-bottom: 25px; gap: 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 30px; flex-wrap: wrap; }
 .report-controls .search-bar { width: 100%; flex: 1 1 55%; padding: 12px; border-radius: 8px; border: 1px solid #ced4da; font-size: 1em; }
 .sort-dropdown-wrapper { flex: 1 1 40%; }
-.obs-card { display: flex; flex-direction: column; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 20px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); gap: 25px; }
-@media (min-width: 768px) { .obs-card { flex-direction: row; } }
+
+/* --- REVISED CARD LAYOUT STYLES --- */
+.obs-card {
+    display: flex;
+    flex-direction: column; /* Stack body and footer vertically */
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.card-body {
+    display: flex;
+    flex-direction: column; /* Mobile first: main content on top of sidebar */
+    gap: 25px;
+    width: 100%;
+}
 .card-main { flex: 3; }
 .card-main h3 { margin-top: 0; margin-bottom: 15px; color: #003366; font-size: 1.4em; font-weight: 600; }
 .card-main p { margin: 8px 0; line-height: 1.6; color: #495057; }
 .card-sidebar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-.card-photo { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; border: 1px solid #ced4da; }
-.risk-box { width: 100%; text-align: center; }
+.card-photo { width: 100%; max-width: 250px; object-fit: cover; border-radius: 5px; border: 1px solid #ced4da; }
+.risk-box { width: 100%; max-width: 250px; text-align: center; }
 .risk-title { font-weight: 500; font-size: 0.9em; color: #6c757d; margin-bottom: 5px; }
 .risk-value { font-size: 2.8em; font-weight: 700; padding: 15px 10px; border-radius: 8px; color: #fff; line-height: 1; }
 .risk-low { background-color: #04A227; }
 .risk-medium { background-color: #FFD406; }
 .risk-high { background-color: #FF7A00; }
 .risk-critical { background-color: #F14219; }
+.card-footer { width: 100%; padding-top: 20px; margin-top: 20px; border-top: 1px solid #e9ecef; text-align: right; }
+.card-delete-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+.card-delete-button:hover { background-color: #c0392b; }
 
 /* --- LANDING PAGE STYLES --- */
 .landing-page-wrapper { background-color: #ffffff; min-height: 100vh; }
@@ -158,6 +202,16 @@ body {
 }
 
 /* --- RESPONSIVE MEDIA QUERIES --- */
+@media (min-width: 768px) {
+    /* On larger screens, make the card body horizontal */
+    .card-body {
+        flex-direction: row;
+    }
+    .card-photo, .risk-box {
+        max-width: none; /* remove max-width for sidebar items */
+    }
+}
+
 @media (max-width: 992px) {
     /* Observation and Report Page Header */
     .observation-header .mobile-menu-toggle { display: flex; }

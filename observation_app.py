@@ -6,7 +6,7 @@ import base64
 import io
 
 import dash
-from dash import dcc, html, Input, Output, State, no_update
+from dash import dcc, html, Input, Output, State, no_update, ALL
 from dash.exceptions import PreventUpdate
 
 # Import shared custom modules
@@ -104,10 +104,17 @@ def build_report_page():
     """Builds the layout for the updated, full-width report page."""
     return html.Div([
         dcc.Download(id='download-excel'),
+        # Components for delete functionality
+        dcc.ConfirmDialog(id='confirm-delete-dialog', message='Are you sure you want to delete this observation? It cannot be undone.'),
+        dcc.Store(id='store-id-to-delete'),
+        dcc.Store(id='store-refresh-signal', data=0),
+
         html.Div(className="report-page-container", children=[
-            _build_app_header(page_type='report'), # Use the helper to build the header
+            _build_app_header(page_type='report'),
             html.Div(className="report-main-content", children=[
                 html.H1("Full Safety Observation Report", className="form-title"),
+                # Container for status messages (e.g., deletion confirmation)
+                html.Div(id='delete-status-message'),
                 html.Div(className="report-controls", children=[
                     dcc.Input(id='search-input', type='text', placeholder='Search in descriptions, locations, floors...', debounce=True, className='search-bar'),
                     html.Div(className="sort-dropdown-wrapper", children=[
@@ -243,9 +250,10 @@ def register_callbacks(app):
         Output('report-content-container', 'children'),
         Input('url', 'pathname'),
         Input('search-input', 'value'),
-        Input('sort-dropdown', 'value')
+        Input('sort-dropdown', 'value'),
+        Input('store-refresh-signal', 'data') # Listens for the signal to refresh
     )
-    def update_report_view(pathname, search_term, sort_by):
+    def update_report_view(pathname, search_term, sort_by, refresh_signal):
         if pathname != '/report': raise PreventUpdate
         observations = database.get_observations_from_db(search_term, sort_by)
         if not observations: return html.P("No observations found.", style={'textAlign': 'center', 'padding': '50px'})
@@ -256,18 +264,24 @@ def register_callbacks(app):
             if 5 <= risk <= 9: risk_class = 'risk-medium'
             elif 10 <= risk <= 15: risk_class = 'risk-high'
             elif risk >= 16: risk_class = 'risk-critical'
+            # --- MODIFIED CARD STRUCTURE FOR LAYOUT FIX ---
             card = html.Div(className="obs-card", children=[
-                html.Div(className="card-main", children=[
-                    html.H3(f"Obs #{obs['id']}: {obs['location']} ({obs['floor']})"),
-                    html.P([html.B("Date: "), obs['date_str']]),
-                    html.P([html.B("Impact: "), obs['impact']]),
-                    html.P([html.B("Description: "), obs['description']]),
-                    html.P([html.B("Corrective Action: "), obs['corrective_action']]),
-                    html.P([html.B("Assigned To: "), f"{str(obs.get('responsible_person', 'N/A')).title()} | ", html.B("Deadline: "), f"{obs.get('deadline', 'N/A')}"])
+                html.Div(className="card-body", children=[
+                    html.Div(className="card-main", children=[
+                        html.H3(f"Obs #{obs['id']}: {obs['location']} ({obs['floor']})"),
+                        html.P([html.B("Date: "), obs['date_str']]),
+                        html.P([html.B("Impact: "), obs['impact']]),
+                        html.P([html.B("Description: "), obs['description']]),
+                        html.P([html.B("Corrective Action: "), obs['corrective_action']]),
+                        html.P([html.B("Assigned To: "), f"{str(obs.get('responsible_person', 'N/A')).title()} | ", html.B("Deadline: "), f"{obs.get('deadline', 'N/A')}"])
+                    ]),
+                    html.Div(className="card-sidebar", children=[
+                        html.Div(className="risk-box", children=[html.P("Risk Rating", className="risk-title"), html.P(risk, className=f"risk-value {risk_class}")]),
+                        html.Img(src=f"data:image/png;base64,{obs['photo_b64']}" if obs['photo_b64'] else '/assets/placeholder.png', className="card-photo")
+                    ])
                 ]),
-                html.Div(className="card-sidebar", children=[
-                    html.Div(className="risk-box", children=[html.P("Risk Rating", className="risk-title"), html.P(risk, className=f"risk-value {risk_class}")]),
-                    html.Img(src=f"data:image/png;base64,{obs['photo_b64']}" if obs['photo_b64'] else '/assets/placeholder.png', className="card-photo")
+                html.Div(className="card-footer", children=[
+                    html.Button('Delete Observation', id={'type': 'delete-button', 'index': obs['id']}, n_clicks=0, className='card-delete-button')
                 ])
             ])
             cards.append(card)
@@ -299,3 +313,46 @@ def register_callbacks(app):
     )
     def update_filename_display(filename):
         return f"File selected: {filename}" if filename else ""
+
+    # --- NEW CALLBACKS FOR DELETION ---
+
+    # 1. When a delete button is clicked, show the confirmation dialog
+    @app.callback(
+        Output('confirm-delete-dialog', 'displayed'),
+        Output('store-id-to-delete', 'data'),
+        Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
+        prevent_initial_call=True
+    )
+    def display_delete_confirmation(n_clicks_list):
+        # --- FIX: Only proceed if a button was actually clicked (n_clicks > 0) ---
+        if not any(n_clicks > 0 for n_clicks in n_clicks_list if n_clicks is not None):
+            raise PreventUpdate
+        
+        ctx = dash.callback_context
+        if not ctx.triggered_id:
+            raise PreventUpdate
+        
+        obs_id_to_delete = ctx.triggered_id['index']
+        return True, obs_id_to_delete
+
+    # 2. When the user confirms deletion, delete from DB and trigger a page refresh.
+    @app.callback(
+        Output('store-refresh-signal', 'data'),
+        Output('delete-status-message', 'children'),
+        Input('confirm-delete-dialog', 'submit_n_clicks'),
+        State('store-id-to-delete', 'data'),
+        State('store-refresh-signal', 'data'),
+        prevent_initial_call=True
+    )
+    def process_deletion(submit_n_clicks, obs_id, refresh_count):
+        if not obs_id:
+            return no_update, no_update
+
+        try:
+            database.delete_observation_from_db(obs_id)
+            message = html.Div(f"Observation #{obs_id} was successfully deleted.", className="message-success")
+            return refresh_count + 1, message
+        except Exception as e:
+            print(f"Error during deletion of observation {obs_id}: {e}")
+            message = html.Div(f"Error: Could not delete observation #{obs_id}.", className="message-error")
+            return no_update, message
