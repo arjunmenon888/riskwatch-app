@@ -23,75 +23,109 @@ from openpyxl.drawing.image import Image as OpenpyxlImage
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-# --- Layout Functions for Safety Observation ---
+# --- HELPER FUNCTION TO BUILD RESPONSIVE HEADER ---
+def _build_app_header(page_type='form'):
+    """Builds the responsive header for the app's internal pages."""
+    if page_type == 'report':
+        # Links for the Report Page (includes download button)
+        nav_links = [
+            dcc.Link('Home', href='/', className='header-nav-link'),
+            dcc.Link('Add Observation', href='/observation', className='header-nav-link'),
+            html.Button("Download Full Report as Excel", id='download-report-button', className="nav-download-button"),
+            dcc.Link('Log Out', href='/', className='header-nav-link')
+        ]
+    else:
+        # Default links for the Observation Form Page (no download button)
+        nav_links = [
+            dcc.Link('Home', href='/', className='header-nav-link'),
+            dcc.Link('View Full Report', href='/report', className='header-nav-link'),
+            dcc.Link('Log Out', href='/', className='header-nav-link')
+        ]
 
-def build_observation_form_page():
-    """Builds the layout for the observation submission form."""
-    return html.Div(className="container", children=[
-        html.Div(className="header", children=[
-            html.Img(src='/assets/riskwatch-logo.png', alt="RiskWatch Logo", className="app-logo"),
-            html.P("Safety Observation Assistant", className="app-subtitle", style={'fontSize': '24px', 'fontWeight': '500'}),
-            dcc.Link('Back to Home', href='/', className='nav-link')
-        ]),
-        html.Ul(id='flash-messages-container', className="flash-messages"),
-        html.Div([
-            html.Div(className="form-group", children=[
-                html.Label("Floor:", htmlFor="floor-input"),
-                dcc.Input(type="text", id="floor-input", placeholder="e.g., Ground Floor, B1, lvl 2...", required=True)
+    return html.Header(className="observation-header", children=[
+        html.Img(src='/assets/riskwatch-logo.png', alt="RiskWatch Logo", className="header-logo"),
+        html.Nav(className="header-nav-container", children=[
+            html.Button(className="mobile-menu-toggle", id="obs-mobile-menu-toggle", children=[
+                html.Span(className="toggle-bar"),
+                html.Span(className="toggle-bar"),
+                html.Span(className="toggle-bar"),
             ]),
-            html.Div(className="form-group", children=[
-                html.Label("Location:", htmlFor="location-input"),
-                dcc.Input(type="text", id="location-input", placeholder="e.g., Main Lobby...", required=True)
-            ]),
-            html.Div(className="form-group", children=[
-                html.Label("Observation Details:", htmlFor="observation-textarea"),
-                dcc.Textarea(id="observation-textarea", placeholder="Describe what you observed...", required=True, rows=5)
-            ]),
-            html.Div(className="form-group", children=[
-                html.Label("Attach Photo (Optional):"),
-                dcc.Upload(
-                    id='photo-upload', className="photo-upload-area",
-                    children=html.A([
-                        html.Img(src='/assets/upload-icon.png', className="photo-upload-img-icon"),
-                        "Upload or Take Photo"
-                    ], className="upload-photo-button-label"),
-                    multiple=False
-                ),
-                html.Span(id="selected-file-name")
-            ]),
-            html.Div(className="button-group", children=[
-                html.Button("Add Observation to Database", id="add-button", n_clicks=0, className="button-style"),
-                dcc.Link('View Full Report', href='/report', className='button-style download-button', style={'textAlign': 'center'})
-            ])
-        ]),
-        html.Div("© 2024 RiskWatch - Created by Arjun Menon", className="app-footer")
+            html.Div(id="obs-header-nav", className="header-nav", children=nav_links)
+        ])
     ])
+
+
+# --- Layout Functions for Safety Observation ---
+def build_observation_form_page():
+    """Builds the layout for the updated observation submission form."""
+    return html.Div([
+        # The dcc.Download component must exist in the layout for the callback to work,
+        # even if the button isn't on this page. It's invisible.
+        dcc.Download(id='download-excel'),
+        html.Ul(id='flash-messages-container', className="flash-messages"),
+        html.Div(className="observation-form-container", children=[
+            _build_app_header(page_type='form'), # Use the helper to build the header
+            html.Div(className="form-content", children=[
+                html.H1("Safety Observation Assistant", className="form-title"),
+                html.Div(className="form-group", children=[
+                    html.Label("Floor:", htmlFor="floor-input"),
+                    dcc.Input(type="text", id="floor-input", placeholder="e.g., Ground Floor, B1, lvl 2...", required=True, className="red-border-input")
+                ]),
+                html.Div(className="form-group", children=[
+                    html.Label("Location:", htmlFor="location-input"),
+                    dcc.Input(type="text", id="location-input", placeholder="e.g., Main Lobby...", required=True, className="red-border-input")
+                ]),
+                html.Div(className="form-group", children=[
+                    html.Label("Observation Details:", htmlFor="observation-textarea"),
+                    dcc.Textarea(id="observation-textarea", placeholder="Describe what you observed...", required=True, rows=6)
+                ]),
+                html.Div(className="form-group", children=[
+                    html.Label("Attach Photo (Optional):"),
+                    dcc.Upload(
+                        id='photo-upload',
+                        className="photo-upload-area-styled",
+                        children=html.Div([
+                            html.Img(src='/assets/upload-icon.png', className="upload-icon-img-styled"),
+                            html.Span("Upload or Take Photo")
+                        ], className="photo-upload-button-styled"),
+                        multiple=False
+                    ),
+                    html.Span(id="selected-file-name")
+                ]),
+                html.Div(className="submit-button-container", children=[
+                    html.Button("Add Observation to Database", id="add-button", n_clicks=0, className="submit-button-style")
+                ])
+            ])
+        ])
+    ])
+
 
 def build_report_page():
-    """Builds the layout for the full observation report page."""
-    return html.Div(className="report-container", children=[
+    """Builds the layout for the updated, full-width report page."""
+    return html.Div([
         dcc.Download(id='download-excel'),
-        html.Div(className="header", children=[
-            html.Img(src='/assets/riskwatch-logo.png', alt="RiskWatch Logo", className="app-logo"),
-            html.H1("Full Safety Observation Report"),
-            dcc.Link('Back to Home', href='/', className='nav-link')
-        ]),
-        html.Div(className="report-controls", children=[
-            dcc.Input(id='search-input', type='text', placeholder='Search in descriptions, locations, floors...', debounce=True, className='search-bar'),
-            html.Div(className="sort-dropdown-wrapper", children=[
-                dcc.Dropdown(
-                    id='sort-dropdown',
-                    options=[
-                        {'label': 'Sort by Newest First', 'value': 'date_newest'},
-                        {'label': 'Sort by Oldest First', 'value': 'date_oldest'},
-                        {'label': 'Sort by Highest Risk', 'value': 'risk_high'},
-                    ], value='date_newest', clearable=False
-                )
-            ]),
-            html.Button("Download Full Report as Excel", id='download-report-button', className="button-style download-button")
-        ]),
-        html.Div(id='report-content-container') # Content is loaded by a callback
+        html.Div(className="report-page-container", children=[
+            _build_app_header(page_type='report'), # Use the helper to build the header
+            html.Div(className="report-main-content", children=[
+                html.H1("Full Safety Observation Report", className="form-title"),
+                html.Div(className="report-controls", children=[
+                    dcc.Input(id='search-input', type='text', placeholder='Search in descriptions, locations, floors...', debounce=True, className='search-bar'),
+                    html.Div(className="sort-dropdown-wrapper", children=[
+                        dcc.Dropdown(
+                            id='sort-dropdown',
+                            options=[
+                                {'label': 'Sort by Newest First', 'value': 'date_newest'},
+                                {'label': 'Sort by Oldest First', 'value': 'date_oldest'},
+                                {'label': 'Sort by Highest Risk', 'value': 'risk_high'},
+                            ], value='date_newest', clearable=False
+                        )
+                    ]),
+                ]),
+                html.Div(id='report-content-container')
+            ])
+        ])
     ])
+
 
 # --- Helper Function for Excel Generation ---
 def generate_excel_for_download(observations_data):
@@ -149,7 +183,6 @@ def generate_excel_for_download(observations_data):
         elif 10 <= risk_rating <= 15: risk_cell.fill = orange_fill
         elif risk_rating >= 16: risk_cell.fill = red_fill
         
-        # In Postgres, bytea comes back as memoryview or bytes, which is fine
         photo_bytes_data = entry.get('photo_bytes')
         if photo_bytes_data:
             try:
@@ -170,6 +203,18 @@ def generate_excel_for_download(observations_data):
 def register_callbacks(app):
     """Registers all callbacks for the observation app."""
 
+    @app.callback(
+        Output('obs-header-nav', 'className'),
+        Input('obs-mobile-menu-toggle', 'n_clicks'),
+        State('obs-header-nav', 'className'),
+        prevent_initial_call=True
+    )
+    def toggle_obs_mobile_menu(n_clicks, current_class):
+        if 'active' in current_class:
+            return "header-nav"
+        else:
+            return "header-nav active"
+            
     @app.callback(
         Output('flash-messages-container', 'children'),
         Output('floor-input', 'value'),
@@ -227,7 +272,7 @@ def register_callbacks(app):
             ])
             cards.append(card)
         return cards
-
+        
     @app.callback(
         Output('download-excel', 'data'),
         Input('download-report-button', 'n_clicks'),
@@ -235,9 +280,7 @@ def register_callbacks(app):
     )
     def download_full_report(n_clicks):
         conn = database.get_db_connection()
-        # Use a cursor to execute the query, with RealDictCursor to get dicts
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Fetch all columns, including the photo_bytes for the Excel file
             cur.execute("SELECT * FROM observations ORDER BY id ASC")
             obs_for_excel = cur.fetchall()
         conn.close()

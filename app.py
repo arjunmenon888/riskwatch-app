@@ -4,6 +4,7 @@ from dash import dcc, html, Input, Output
 # Import the feature-specific modules
 import observation_app
 import near_miss_app
+import landing_page  # --- MODULE IS ALREADY IMPORTED ---
 
 # Import and initialize the database
 import database
@@ -28,18 +29,10 @@ app.layout = html.Div([
 # This crucial step connects the callbacks defined in your feature modules to the main app.
 observation_app.register_callbacks(app)
 near_miss_app.register_callbacks(app)
+landing_page.register_callbacks(app) # <<<--- THIS WAS THE MISSING LINE. IT IS NOW ADDED.
 
 
-# --- Page Layouts (Core App) ---
-def build_home_page():
-    """Builds the layout for the home/navigation page."""
-    return html.Div(className="home-container", children=[
-        html.Img(src=app.get_asset_url('riskwatch-logo.png'), alt="RiskWatch Logo", className="app-logo"),
-        html.Div(className="home-button-container", children=[
-            dcc.Link("Safety Observation", href="/observation", className="button-style"),
-            dcc.Link("Near Miss Report", href="/near-miss", className="button-style")
-        ])
-    ])
+# --- PAGE LAYOUTS ARE NOW HANDLED BY THE ROUTING CALLBACK ---
 
 
 # --- Main Routing Callback ---
@@ -53,7 +46,8 @@ def display_page(pathname):
     elif pathname == '/near-miss':
         return near_miss_app.build_near_miss_page()
     else:
-        return build_home_page()
+        # --- CALL THE LAYOUT FUNCTION FROM THE DEDICATED MODULE ---
+        return landing_page.create_layout(app)
 
 
 # --- Main Entry Point ---
